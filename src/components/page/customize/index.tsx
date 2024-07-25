@@ -20,7 +20,6 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import github from '../../../../public/assets/github.svg';
 import youtube from '../../../../public/assets/youtube.svg';
-import facebook from '../../../../public/assets/facebook.svg';
 import chain from '../../../../public/assets/link_2.svg';
 import linkedin from '../../../../public/assets/linkedin.svg';
 import fingerImage from '../../../../public/assets/fingerImage.svg';
@@ -57,7 +56,8 @@ const CustomizeLinks: NextPage = () => {
     {}
   );
   const [showPlaceholder, setShowPlaceholder] = useState<boolean>(true);
-  const [validationPerformed, setValidationPerformed] = useState<boolean>(false);
+  const [validationPerformed, setValidationPerformed] =
+    useState<boolean>(false);
   const router = useRouter();
 
   const fetchLinks = useCallback(async () => {
@@ -114,9 +114,8 @@ const CustomizeLinks: NextPage = () => {
             });
         },
         30 * 60 * 1000
-      ); // 30 minutes
+      ); 
 
-      // Clear timeout if the component unmounts or user changes
       return () => clearTimeout(timeout);
     }
   }, [user]);
@@ -188,7 +187,7 @@ const CustomizeLinks: NextPage = () => {
   );
 
   const saveLinks = async () => {
-    setValidationPerformed(true); // Set validationPerformed to true when save is clicked
+    setValidationPerformed(true); 
 
     if (links.some((link, index) => !urls[index])) {
       toast.error("Links can't be empty");
@@ -200,8 +199,10 @@ const CustomizeLinks: NextPage = () => {
       return;
     }
 
-    // Check if all URLs are valid
-    const invalidLinks = links.filter((link, index) => !isValidUrl(link.platform, urls[index] || ''));
+    
+    const invalidLinks = links.filter(
+      (link, index) => !isValidUrl(link.platform, urls[index] || '')
+    );
     if (invalidLinks.length > 0) {
       toast.error('One or more links are invalid. Please check and try again.');
       return;
@@ -209,7 +210,7 @@ const CustomizeLinks: NextPage = () => {
 
     try {
       const promises = links.map((link, index) => {
-        const linkData = { ...link, url: urls[index] || '' }; // Ensure URL is passed correctly
+        const linkData = { ...link, url: urls[index] || '' }; 
         console.log('Saving link:', linkData);
         if (link.id) {
           // Update existing link
@@ -233,8 +234,12 @@ const CustomizeLinks: NextPage = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-2 border-[#633CFF]"></div>
+      <div className="flex flex-col items-center justify-center space-y-2 text-surface dark:text-black">
+        <strong className="text-lg">Loading...</strong>
+        <div
+          className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-t-transparent border-b-current border-l-current border-r-current"
+          role="status"
+        ></div>
       </div>
     );
   }
@@ -318,7 +323,9 @@ const CustomizeLinks: NextPage = () => {
                         <div className="w-3 border border-gray bg-gray" />
                         <div className="w-3 border border-gray mt-1 bg-gray" />
                       </div>
-                      <p className="text-[#737373] font-semibold">Link #{index + 1}</p>
+                      <p className="text-[#737373] font-semibold">
+                        Link #{index + 1}
+                      </p>
                     </div>
                     <button
                       onClick={() => removeLink(index)}
@@ -369,7 +376,7 @@ const CustomizeLinks: NextPage = () => {
                       )}
                     </div>
                   </div>
-                  <div className='relative'>
+                  <div className="relative">
                     <label className="text-[#737373] text-xs" htmlFor="Label">
                       Link
                     </label>
@@ -383,12 +390,19 @@ const CustomizeLinks: NextPage = () => {
                       onChange={(e) => handleUrlChange(index, e.target.value)}
                       className={`w-full p-2 border ${isValidUrl(link.platform, urls[index] || '') || !validationPerformed ? 'border-gray ' : 'border-red focus:border-tertiary'} focus:shadow-custom-shadow outline-none rounded-lg text-black px-[1.9rem]`}
                     />
-                    <Image src={chain} alt='link' width={20} height={20} className='absolute top-9 left-1 mx-1'/> 
-                    {!isValidUrl(link.platform, urls[index] || '') && validationPerformed && (
-                      <p className="text-red text-xs absolute top-9 right-0 mx-5">
-                        Please check the URL
-                      </p>
-                    )}
+                    <Image
+                      src={chain}
+                      alt="link"
+                      width={20}
+                      height={20}
+                      className="absolute top-9 left-1 mx-1"
+                    />
+                    {!isValidUrl(link.platform, urls[index] || '') &&
+                      validationPerformed && (
+                        <p className="text-red text-xs absolute top-9 right-0 mx-5">
+                          Please check the URL
+                        </p>
+                      )}
                   </div>
                 </div>
               ))}
@@ -415,5 +429,3 @@ const CustomizeLinks: NextPage = () => {
 export default CustomizeLinks;
 
 
-
-// {!urls[index] ? `Can't be empty` : 'Please check the URL'}
