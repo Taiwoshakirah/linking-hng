@@ -49,10 +49,10 @@ const Login = () => {
       const res = await signInWithEmailAndPassword(data.email, data.password);
       if (res) {
         toast.success('Login successful!');
-        reset(); 
+        reset(); // Reset form fields
         setTimeout(() => {
           router.push('/');
-        }, 1000); 
+        }, 1000); // Redirect after 1 second
       }
     } catch (e: any) {
       console.error('Sign-in error:', e);
@@ -154,7 +154,7 @@ const Login = () => {
 
         <div className="text-center text-base mt-5">
           <h1 className="flex sm:flex-row justify-center items-center flex-col">
-          Don&apos;t have an account?&nbsp;
+            Don't have an account?&nbsp;
             <Link href={'/register'} className="text-secondary">
               Create account
             </Link>

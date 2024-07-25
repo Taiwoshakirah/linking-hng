@@ -5,7 +5,7 @@ import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
 import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
-import { auth, db } from '../firebase/config'; 
+import { auth, db } from '../firebase/config'; // Adjust path as needed
 import { doc, setDoc } from 'firebase/firestore';
 import toast, { Toaster } from 'react-hot-toast';
 import logo from '../../../public/assets/logo.svg';
@@ -61,9 +61,9 @@ const Signup = () => {
           createdAt: new Date(),
         });
         toast.success('Sign-up successful! Redirecting to sign-in...');
-        reset(); 
+        reset(); // Reset the form fields
         setTimeout(() => {
-          window.location.href = '/login'; 
+          window.location.href = '/login'; // Redirect after 3 seconds
         }, 3000);
       } else {
         toast.error('Sign-up failed. Please try again.');
@@ -100,7 +100,7 @@ const Signup = () => {
       <div className="border bg-white flex flex-col gap-2 sm:w-[476px] sm:h-auto sm:p-10 px-5 py-[2rem] rounded-md border-white">
         <h2 className="sm:text-[32px] text-2xl font-bold">Create account</h2>
         <h3 className="text-base text-gray">
-        Let&apos;s get you started sharing your links!
+          Let's get you started sharing your links!
         </h3>
 
         <form
@@ -201,7 +201,7 @@ const Signup = () => {
 
         <div className="text-center text-base mt-5">
           <h1 className="flex sm:flex-row justify-center items-center flex-col">
-            `Already have an account?&nbsp;`
+            Already have an account?&nbsp;
             <Link href={'/login'} className="text-secondary">
               Sign in
             </Link>

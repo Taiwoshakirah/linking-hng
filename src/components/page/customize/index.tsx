@@ -15,6 +15,7 @@ import {
   where,
   updateDoc,
   doc,
+  getDoc,
 } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -23,22 +24,25 @@ import youtube from '../../../../public/assets/youtube.svg';
 import chain from '../../../../public/assets/link_2.svg';
 import linkedin from '../../../../public/assets/linkedin.svg';
 import fingerImage from '../../../../public/assets/fingerImage.svg';
+import facebook from '../../../../public/assets/facebook.svg';
 import { toast, Toaster } from 'react-hot-toast';
 import { signOut } from 'firebase/auth';
 import Link from 'next/link';
 
-const platforms = ['GitHub', 'LinkedIn', 'YouTube'];
+const platforms = ['GitHub', 'LinkedIn', 'Facebook', 'YouTube'];
 
 const platformDefaultUrls: Record<string, string> = {
   GitHub: 'https://github.com/username',
   LinkedIn: 'https://linkedin.com/in/username',
   YouTube: 'https://youtube.com/channel/username',
+  Facebook: 'https://facebook.com/username',
 };
 
 const platformImages: Record<string, string> = {
   GitHub: github,
   LinkedIn: linkedin,
   YouTube: youtube,
+  Facebook: facebook,
 };
 
 interface Link {
@@ -56,6 +60,8 @@ const CustomizeLinks: NextPage = () => {
     {}
   );
   const [showPlaceholder, setShowPlaceholder] = useState<boolean>(true);
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
   const [validationPerformed, setValidationPerformed] =
     useState<boolean>(false);
   const router = useRouter();
@@ -70,9 +76,6 @@ const CustomizeLinks: NextPage = () => {
         ...doc.data(),
       })) as Link[];
 
-      console.log('Fetched links:', linksList);
-
-      // Update both links and urls state
       setLinks(linksList);
       const urlMap = linksList.reduce(
         (acc, link, index) => {
@@ -92,6 +95,30 @@ const CustomizeLinks: NextPage = () => {
   useEffect(() => {
     fetchLinks();
   }, [fetchLinks]);
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      if (user) {
+        try {
+          const profileDocRef = doc(db, 'profiles', user.uid);
+          const profileDocSnap = await getDoc(profileDocRef);
+
+          if (profileDocSnap.exists()) {
+            const profileData = profileDocSnap.data() as {
+              imageUrl?: string;
+              email?: string;
+            };
+            setProfilePicture(profileData.imageUrl || null);
+            setEmail(profileData.email ?? null);
+          }
+        } catch (err) {
+          console.error('Error fetching profile data:', err);
+        }
+      }
+    };
+
+    fetchProfileData();
+  }, [user]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -116,6 +143,7 @@ const CustomizeLinks: NextPage = () => {
         30 * 60 * 1000
       ); 
 
+     
       return () => clearTimeout(timeout);
     }
   }, [user]);
@@ -124,6 +152,7 @@ const CustomizeLinks: NextPage = () => {
     const regexes: Record<string, RegExp> = {
       GitHub: /^https:\/\/github\.com\/.+/,
       LinkedIn: /^https:\/\/(www\.)?linkedin\.com\/in\/.+/,
+      Facebook: /^https:\/\/(www\.)?facebook\.com\/.+/,
       YouTube: /^https:\/\/(www\.)?youtube\.com\/(channel|user)\/.+/,
     };
     return regexes[platform]?.test(url) ?? false;
@@ -213,10 +242,10 @@ const CustomizeLinks: NextPage = () => {
         const linkData = { ...link, url: urls[index] || '' }; 
         console.log('Saving link:', linkData);
         if (link.id) {
-          // Update existing link
+          
           return updateDoc(doc(db, 'links', link.id), linkData);
         } else {
-          // Add new link
+          
           return addDoc(collection(db, 'links'), {
             ...linkData,
             userId: user.uid,
@@ -225,25 +254,26 @@ const CustomizeLinks: NextPage = () => {
       });
       await Promise.all(promises);
       toast.success('Links saved successfully!');
-      fetchLinks(); // Refresh the links
+      fetchLinks(); 
     } catch (error) {
       toast.error('Error saving links.');
       console.error('Error saving links:', error);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center space-y-2 text-surface dark:text-black">
-        <strong className="text-lg">Loading...</strong>
-        <div
-          className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-t-transparent border-b-current border-l-current border-r-current"
-          role="status"
-        ></div>
-      </div>
-    );
-  }
-
+if(loading){
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <button type="button" className="bg-indigo-500 text-white font-semibold py-2 px-4 rounded flex items-center" disabled>
+        <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291l1.295-1.295a6.037 6.037 0 003.291 1.215v4A8.001 8.001 0 016 17.291z"></path>
+        </svg>
+        Processing...
+      </button>
+    </div>
+  );
+}
+  
   if (error || !user) {
     return (
       <div className="text-center flex flex-col items-center justify-center min-h-screen">
@@ -264,6 +294,8 @@ const CustomizeLinks: NextPage = () => {
     <>
       <div className="flex bg-primary">
         <MainLayout
+          profilePicture={profilePicture || undefined}
+          email={email || undefined}
           links={links.map((link, index) => ({
             platform: link.platform,
             url: urls[index] || platformDefaultUrls[link.platform] || '',
@@ -427,5 +459,3 @@ const CustomizeLinks: NextPage = () => {
 };
 
 export default CustomizeLinks;
-
-
